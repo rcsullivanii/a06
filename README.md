@@ -24,15 +24,15 @@ This basic structure gives a lot of places that behavior can be parameterized or
 ## Design Rationale
 What decisions did you make to get it running? Explain your overall design.
 
-An atomic counter is used for to prevent race conditions where multiple goroutines try to increment the global customer ID at the same time.
+An atomic counter is used for to prevent race conditions when multiple goroutines try to increment the global customer ID at the same time. This is the only instance of "shared data" in the file.
 
-Notably, the select statement used in the receptionist goroutine allows us to attempt to send a value and if send is blocked, then default statement gets executed. This works because we know if the send is blocked, there must already be 6 Customers in channel and therefore a full waiting room. If not, the customer is added to the waiting room.
+The select statement used in the receptionist goroutine allows us to attempt to send a value and if send is blocked, then default statement gets executed. This works because we know if the send is blocked, there must already be 6 Customers in the buffered channel and therefore a full waiting room. Otherwise, the customer is added to the waiting room.
 
-In our waiting room FIFO, we attempt to send the first customer in the waiting channel into the unbuffered "chair" channel. This send operation will block the barber is busy. It will, however, continue to try to send until eventually the barber completes the haircut and is ready for the next customer.
+In our waiting room FIFO, we attempt to send the first customer in the waiting channel into the unbuffered "chair" channel. This send operation will block whenthe barber is busy (i.e. sleeping while simulating a haircut). It will, however, continue to try to send until eventually the barber completes the haircut and is ready for the next customer.
 
-New customers are spawned randomly between 0-3 seconds and haircuts take some random time between 0-5 seconds. This is to show, eventually, an acculumation in the waiting room.
+New customers are spawned randomly between 0-3 seconds and haircuts take some random time between 0-5 seconds. This is to show proper receptionist behavior when there is acculumation in the waiting room.
 
-for{} ensures that the main goroutine and the goroutines that it has spawned continue until eventually the user exits the program using control + c.
+Adding for{} to the end of the main goroutine ensures that the main program and the goroutines that it has spawned continue until eventually the user exits the program using control + c.
 
 ## Sources
 https://go.dev/tour/flowcontrol/4

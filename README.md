@@ -36,8 +36,13 @@ for{} ensures that the main goroutine and the goroutines that it has spawned con
 
 ## Sources
 https://go.dev/tour/flowcontrol/4
+
 https://gobyexample.com/atomic-counters 
+
 https://go.dev/tour/basics/11
+
 https://gobyexample.com/channels
+
 https://gobyexample.com/channel-buffering 
+
 https://go.dev/tour/concurrency/6 

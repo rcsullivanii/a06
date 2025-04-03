@@ -6,7 +6,7 @@ Robert Sullivan and Cole Vita
 ## Assignment Details 
 Write a Go program to solve the Sleeping Barber problem. No need in the Go version to worry about hot-swapping code, but follow the other specs for the previous Elixir assignment (Assn. 5)
 - Make each new customer a goroutine
-- Make a goroutine for the waiting room
+- Make the waiting room a goroutine
 - Make the receptionist a goroutine
   - The receptionist greets each arriving customer
   - If there is room to wait, the receptionist sends the customer to the waiting room; if no room, the customer is turned away.
@@ -23,3 +23,21 @@ This basic structure gives a lot of places that behavior can be parameterized or
 
 ## Design Rationale
 What decisions did you make to get it running? Explain your overall design.
+
+An atomic counter is used for to prevent race conditions where multiple goroutines try to increment the global customer ID at the same time.
+
+Notably, the select statement used in the receptionist goroutine allows us to attempt to send a value and if send is blocked, then default statement gets executed. This works because we know if the send is blocked, there must already be 6 Customers in channel and therefore a full waiting room. If not, the customer is added to the waiting room.
+
+In our waiting room FIFO, we attempt to send the first customer in the waiting channel into the unbuffered "chair" channel. This send operation will block the barber is busy. It will, however, continue to try to send until eventually the barber completes the haircut and is ready for the next customer.
+
+New customers are spawned randomly between 0-3 seconds and haircuts take some random time between 0-5 seconds. This is to show, eventually, an acculumation in the waiting room.
+
+for{} ensures that the main goroutine and the goroutines that it has spawned continue until eventually the user exits the program using control + c.
+
+## Sources
+https://go.dev/tour/flowcontrol/4
+https://gobyexample.com/atomic-counters 
+https://go.dev/tour/basics/11
+https://gobyexample.com/channels
+https://gobyexample.com/channel-buffering 
+https://go.dev/tour/concurrency/6 
